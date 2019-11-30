@@ -1,11 +1,15 @@
 import React, {useState, useReducer} from "react";
+
 import Question from "./Question.js";
 import generateQuestionsQueueFromHeadlines from "./generateQuestionsQueueFromHeadlines.js";
+
 import surveyReducer from "./survey-state/reducer.js";
 import surveyStateDefault from "./survey-state/default-state.js";
 import { SET_ANSWER_QUEUE, SET_QUESTION_ANSWER, INCREASE_CURRENT_QUESTION, RESET_REDUCER } from "./survey-state/action-types.js";
+
 import { SELECT_FRAMEWORKS_STEP, SURVEY_STEP, GIVE_COMMENT_STEP, SUBMISSION_STEP } from "./step-state/steps.js";
-import questions from "./questions.json";
+
+import questions from "../static/questions.json";
 
 const humanReadableOtherHeadline = "Diğer";
 
@@ -59,6 +63,7 @@ function App() {
 
 	function handleCommentFormSubmit(event) {
 		event.preventDefault();
+
 		const comment = event.target.querySelector("textarea").value;
 
 		setComment(comment);
@@ -68,8 +73,7 @@ function App() {
 	function handleStartAgainButtonClick(event) {
 		event.preventDefault();
 
-		// window.location.reload();
-
+		// window.location.reload(); :)))
 		setStepState(SELECT_FRAMEWORKS_STEP);
 		setShouldCommentRequired(false);
 		setComment(null);
@@ -93,11 +97,11 @@ function App() {
 	function renderCommentSection() {
 		return (
 			<div>
-				<p>Yorum birakin:</p>
+				<p>{"Yorum birakin:"}</p>
 				<form onSubmit={handleCommentFormSubmit}>
 					<textarea className={"form-control"}
-										required={shouldCommentRequired}></textarea>
-					<button type={"submit"} className={"btn btn-success mt-2"}>Yorum da ekleyin.</button>
+										required={shouldCommentRequired}/>
+					<button type={"submit"} className={"btn btn-success mt-2"}>{"Yorum da ekleyin."}</button>
 				</form>
 			</div>
 		)
@@ -109,47 +113,54 @@ function App() {
 				<h3>Cevapladiginiz Sorular:</h3>
 				{surveyState.questions  ? (
 					<div>
-						{surveyState.questions.map((question, questionIndex) => <Question question={question.question}
-																																							isAnswerable={false}
-																																							answers={question.answers}
-																																							selectedAnswerIndex={surveyState.questionAnswers[questionIndex]}
-																																							key={questionIndex} />)}
+						{surveyState.questions.map((question, questionIndex) => (
+							<Question question={question.question}
+												isAnswerable={false}
+												answers={question.answers}
+												selectedAnswerIndex={surveyState.questionAnswers[questionIndex]}
+												key={questionIndex} />
+						))}
 					</div>
 				) : (
-					<b>Hic soru cevaplamadiniz.</b>
+					<b>{"Hic soru cevaplamadiniz."}</b>
 				)}
 
 				<div className={"mt-1"}>
-					<h3>Yorumunuz:</h3>
+					<h3>{"Yorumunuz:"}</h3>
 					<p className={"text-monospace"}> {comment} </p>
 				</div>
 
 				<div className={"mt-1"}>
-					<h3>Yeniden baslayin:</h3>
-
 					<button type={"button"}
 									onClick={handleStartAgainButtonClick}
-									className={"btn btn-warning"}> Yeniden Baslayin </button>
+									className={"btn btn-warning"}> {"Yeniden Baslayin"} </button>
 				</div>
 			</div>
 		);
 	}
 
+	function renderStep() {
+		switch (step) {
+			case SELECT_FRAMEWORKS_STEP:
+				return (
+					<Question question={"Favori Framework'unuz nedir?"}
+										answers={questionHeadlines}
+										submitButtonText={"Anket'e basla"}
+										isMultipleSelect={true}
+										onAnsweringCompleted={handleStepZeroCompleted}/>
+				);
+			case SURVEY_STEP:
+				return renderSurveySection();
+			case GIVE_COMMENT_STEP:
+				return renderCommentSection();
+			case SUBMISSION_STEP:
+				return renderSubmissionSection();
+		}
+	}
+
 	return (
 		<div className={"m-5"}>
-			{step == SELECT_FRAMEWORKS_STEP && (
-				<Question question={"Favori Framework'unuz nedir?"}
-									answers={questionHeadlines}
-									submitButtonText={"Anket'e basla"}
-									isMultipleSelect={true}
-									onAnsweringCompleted={handleStepZeroCompleted}/>
-			)}
-
-			{step == SURVEY_STEP && renderSurveySection()}
-
-			{step == GIVE_COMMENT_STEP && renderCommentSection()}
-
-			{step == SUBMISSION_STEP && renderSubmissionSection()}
+			{renderStep()}
 		</div>
 	)
 }

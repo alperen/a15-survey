@@ -1,7 +1,7 @@
 import { SET_ANSWER_QUEUE, SET_QUESTION_ANSWER, INCREASE_CURRENT_QUESTION, RESET_REDUCER } from "./action-types";
 import surveyStateDefault from "./default-state";
 
-function surveyReducer(state, action) {
+function surveyReducer(state = surveyStateDefault, action) {
 	switch (action.type) {
 		case SET_ANSWER_QUEUE:
 			return {

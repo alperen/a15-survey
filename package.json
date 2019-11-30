@@ -5,7 +5,8 @@
   "author": "Alperen Türköz <alperentrkz@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start:dev": "webpack-dev-server"
+		"start:dev": "webpack-dev-server",
+		"build": "webpack"
   },
   "dependencies": {
     "js-yaml-loader": "^1.2.2",

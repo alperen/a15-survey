@@ -1,5 +1,7 @@
 import React, {useState} from "react";
 
+const SELECTED_ANSWERS_INDEXES_DEFAULT = [];
+
 function Question(props) {
 	const {
 		question,
@@ -11,23 +13,30 @@ function Question(props) {
 		onAnsweringCompleted
 	} = props;
 
-	const [selectedAnswersIndexes, setSelectedAnswersIndexes] = useState([]);
+	const [selectedAnswersIndexes, setSelectedAnswersIndexes] = useState(SELECTED_ANSWERS_INDEXES_DEFAULT);
 	const areThereSeletedAnswers = selectedAnswersIndexes.length > 0;
 
 	function handleAnswerCheckboxChange(event) {
 		const changedCheckboxValue = event.target.value;
 		const isChecked = event.target.checked;
 
-		if (isMultipleSelect) {
-			if (isChecked) {
-				setSelectedAnswersIndexes([...selectedAnswersIndexes, changedCheckboxValue]);
-			}else {
-				const selectedIndexesWithoutUnselectedIndex = selectedAnswersIndexes
-																												.filter(selectedAnswerIndex => selectedAnswerIndex !== changedCheckboxValue);
-				setSelectedAnswersIndexes(selectedIndexesWithoutUnselectedIndex);
-			}
+		if (isChecked) {
+			setSelectedAnswersIndexes([...selectedAnswersIndexes, changedCheckboxValue]);
+		}else {
+			const unselectedIndexRemoved = selectedAnswersIndexes
+																			.filter(selectedAnswerIndex => selectedAnswerIndex !== changedCheckboxValue);
+			setSelectedAnswersIndexes(unselectedIndexRemoved);
+		}
+	}
+
+	function handleAnswerRadioChange() {
+		const changedRadioValue = event.target.value;
+		const isChecked = event.target.checked;
+
+		if (isChecked) {
+			setSelectedAnswersIndexes([changedRadioValue]);
 		} else {
-			setSelectedAnswersIndexes(changedCheckboxValue);
+			setSelectedAnswersIndexes(SELECTED_ANSWERS_INDEXES_DEFAULT);
 		}
 	}
 
@@ -35,6 +44,8 @@ function Question(props) {
 		event.preventDefault();
 
 		onAnsweringCompleted(selectedAnswersIndexes);
+		// bunu yapmak gerekiyor
+		setSelectedAnswersIndexes(SELECTED_ANSWERS_INDEXES_DEFAULT);
 	}
 
 	return (
@@ -49,25 +60,28 @@ function Question(props) {
 
 				return (
 					<div className={"form-check"}
-						 key={Math.random()}>
-					<input className={"form-check-input ml-0"}
-								 type={isMultipleSelect ? "checkbox" : "radio"}
-								 onChange={handleAnswerCheckboxChange}
-								 checked={isChecked}
-								 disabled={!isAnswerable}
-								 value={answerIndex} />
-					<label className={"form-check-label"}>
-						{answer}
-					</label>
+						 	 key={Math.random()}>
+						<input className={"form-check-input ml-0"}
+									 type={isMultipleSelect ? "checkbox" : "radio"}
+									 onChange={isMultipleSelect ? handleAnswerCheckboxChange : handleAnswerRadioChange}
+									 checked={isChecked}
+									 disabled={!isAnswerable}
+									 value={answerIndex} />
+
+						<label className={"form-check-label"}>
+							{answer}
+						</label>
 				</div>
 				)
 			})}
 
-			{isAnswerable && <button className={"btn btn-primary"}
-							onClick={handleAnswerSubmitButtonClick}
-							disabled={!areThereSeletedAnswers}>
-				{submitButtonText}
-			</button>}
+			{isAnswerable && (
+				<button className={"btn btn-primary"}
+								onClick={handleAnswerSubmitButtonClick}
+							  disabled={!areThereSeletedAnswers}>
+					{submitButtonText}
+				</button>
+			)}
 		</div>
 	)
 }

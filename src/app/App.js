@@ -7,6 +7,14 @@ import surveyReducer from "./survey-state/reducer.js";
 import surveyStateDefault from "./survey-state/default-state.js";
 import { SET_ANSWER_QUEUE, SET_QUESTION_ANSWER, INCREASE_CURRENT_QUESTION, RESET_REDUCER } from "./survey-state/action-types.js";
 
+import commentReducer from "./comment-state/reducer";
+import commentStateDefault from "./comment-state/default-state";
+import {
+	SET_COMMENT,
+	SET_COMMENT_REQUIRED,
+	RESET_REDUCER as COMMENT_RESET_REDUCER
+} from "./comment-state/action-types";
+
 import { SELECT_FRAMEWORKS_STEP, SURVEY_STEP, GIVE_COMMENT_STEP, SUBMISSION_STEP } from "./step-state/steps.js";
 
 import questions from "../static/questions.json";
@@ -15,9 +23,8 @@ const humanReadableOtherHeadline = "Diğer";
 
 function App() {
 	const [step, setStepState] = useState(SELECT_FRAMEWORKS_STEP);
-	const [shouldCommentRequired, setShouldCommentRequired] = useState(false);
-	const [comment, setComment] = useState(null);
 	const [surveyState, surveyStateDispatch] = useReducer(surveyReducer, surveyStateDefault);
+	const [commentState, commentStateDispatch] = useReducer(commentReducer, commentStateDefault);
 	const isLastQuestion = surveyState.activeQuestionIndex == (surveyState.questions.length - 1);
 	const questionHeadlines = questions.map(questionSection => questionSection.name);
 
@@ -27,7 +34,9 @@ function App() {
 		selectedHeadlineIndexes.forEach(headlineIndex => selectedHeadlines.push(questionHeadlines[headlineIndex]));
 
 		if (selectedHeadlines.includes(humanReadableOtherHeadline)) {
-			setShouldCommentRequired(true);
+			commentStateDispatch({
+				type: SET_COMMENT_REQUIRED
+			});
 		}
 
 		const questionsQueue = generateQuestionsQueueFromHeadlines(selectedHeadlines, questions);
@@ -66,7 +75,12 @@ function App() {
 
 		const comment = event.target.querySelector("textarea").value;
 
-		setComment(comment);
+		commentStateDispatch({
+			type: SET_COMMENT,
+			payload: {
+				comment
+			}
+		});
 		setStepState(SUBMISSION_STEP);
 	}
 
@@ -75,8 +89,9 @@ function App() {
 
 		// window.location.reload(); :)))
 		setStepState(SELECT_FRAMEWORKS_STEP);
-		setShouldCommentRequired(false);
-		setComment(null);
+		commentStateDispatch({
+			type: COMMENT_RESET_REDUCER
+		});
 		surveyStateDispatch({
 			type: RESET_REDUCER
 		});
@@ -100,7 +115,7 @@ function App() {
 				<p>{"Yorum birakin:"}</p>
 				<form onSubmit={handleCommentFormSubmit}>
 					<textarea className={"form-control"}
-										required={shouldCommentRequired}/>
+										required={commentState.shouldCommentRequired}/>
 					<button type={"submit"} className={"btn btn-success mt-2"}>{"Yorum da ekleyin."}</button>
 				</form>
 			</div>
@@ -127,7 +142,7 @@ function App() {
 
 				<div className={"mt-1"}>
 					<h3>{"Yorumunuz:"}</h3>
-					<p className={"text-monospace"}> {comment} </p>
+					<p className={"text-monospace"}> {commentState.comment} </p>
 				</div>
 
 				<div className={"mt-1"}>
